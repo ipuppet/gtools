@@ -13,7 +13,7 @@ const (
 	configPathDefault = "./config"
 	configPathUsage   = "Set config file path."
 
-	logPathDefault = "/go/log"
+	logPathDefault = "./var"
 	logPathUsage   = "Set log file path."
 )
 

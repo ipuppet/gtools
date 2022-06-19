@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -55,7 +54,7 @@ func (c *Config) AddNotifyer(n Notifyer) {
 
 func (c *Config) parse() (m map[string]interface{}, err error) {
 	m = make(map[string]interface{}, 50)
-	configString, err := ioutil.ReadFile(c.path())
+	configString, err := os.ReadFile(c.path())
 	if err != nil {
 		return
 	}

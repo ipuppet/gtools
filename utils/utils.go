@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -90,14 +89,14 @@ func getStoragePath(app string, fileName string) string {
 
 func GetStorageContent(app string, fileName string) (string, error) {
 	// 读取文件
-	content, err := ioutil.ReadFile(getStoragePath(app, fileName))
+	content, err := os.ReadFile(getStoragePath(app, fileName))
 
 	return string(content), err
 }
 
 func GetStorageJSON(app string, fileName string, v interface{}) error {
 	// 读取文件
-	content, err := ioutil.ReadFile(getStoragePath(app, fileName))
+	content, err := os.ReadFile(getStoragePath(app, fileName))
 	if err != nil {
 		return err
 	}
@@ -111,7 +110,7 @@ func GetStorageJSON(app string, fileName string, v interface{}) error {
 
 func SetStorageContent(app string, fileName string, content string) error {
 	// 写入文件
-	return ioutil.WriteFile(getStoragePath(app, fileName), []byte(content), 0666)
+	return os.WriteFile(getStoragePath(app, fileName), []byte(content), 0666)
 }
 
 func AppendStorageContent(app string, fileName string, content string) error {

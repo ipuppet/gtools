@@ -52,6 +52,10 @@ func ConnectToMySQL(database string) *sql.DB {
 	return db
 }
 
+func CleanCache() {
+	dbCache.Clean()
+}
+
 func SQLQueryRetrieveMap(db *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, error) {
 	return _SQLQueryRetrieveMap(db, query, true, args...)
 }

@@ -27,6 +27,10 @@ func NewCache() *Cache {
 	return c
 }
 
+func (c *Cache) Clean() {
+	c.blocks = map[string]*CacheBlock{}
+}
+
 func (c *Cache) Set(key string, data CacheBlockDataType) {
 	cb, ok := c.blocks[key]
 	if !ok {

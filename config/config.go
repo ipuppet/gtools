@@ -30,6 +30,15 @@ type Config struct {
 	notifyList     []Notifyer
 }
 
+func New(filename string) *Config {
+	config := &Config{
+		Filename: filename,
+	}
+	config.Init()
+
+	return config
+}
+
 func (c *Config) Init() {
 	m, err := c.parse()
 	if err != nil {

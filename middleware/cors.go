@@ -13,10 +13,7 @@ var (
 
 func Cors(app string) gin.HandlerFunc {
 	if corsConfig == nil {
-		corsConfig = &config.Config{
-			Filename: "cors.json",
-		}
-		corsConfig.Init()
+		corsConfig = config.New("cors.json")
 		corsConfig.AddNotifyer(config.LoggerNotifyer())
 	}
 

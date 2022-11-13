@@ -21,7 +21,7 @@ var (
 
 func init() {
 	logger = utils.Logger("database")
-	dbCache = cache.NewCache()
+	dbCache = cache.New()
 }
 
 func ConnectToMySQL(database string) *sql.DB {
@@ -74,7 +74,7 @@ func _SQLQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...inte
 	if withCache {
 		cacheData := dbCache.Get(cacheKey)
 		if cacheData != nil {
-			return cacheData["results"].([]map[string]interface{}), nil
+			return cacheData.([]map[string]interface{}), nil
 		}
 	}
 
@@ -142,7 +142,7 @@ func _SQLQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...inte
 
 	if withCache {
 		// 设置缓存
-		dbCache.Set(cacheKey, map[string]interface{}{"results": results})
+		dbCache.Set(cacheKey, results)
 	}
 
 	return results, nil

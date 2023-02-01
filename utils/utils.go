@@ -1,44 +1,23 @@
 package utils
 
 import (
-	"bufio"
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
-	"log"
 	"net"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/ipuppet/gtools/flags"
 )
 
 var (
-	BasePath  string
-	loggerMap map[string]*log.Logger
+	BasePath string
 )
 
 func init() {
 	BasePath, _ = os.Getwd()
-	loggerMap = make(map[string]*log.Logger, 10)
-}
-
-func Logger(name string) *log.Logger {
-	if loggerMap[name] == nil {
-		file := filepath.Join(flags.LogPath, "main.log")
-		logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
-		if err != nil {
-			panic(err)
-		}
-		loggerMap[name] = log.New(logFile, "["+name+"] ", log.LstdFlags|log.LUTC)
-	}
-
-	return loggerMap[name]
 }
 
 func ParseIP(s string) (net.IP, int) {
@@ -64,73 +43,15 @@ func MD5(s string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func PathExists(path string) (bool, error) {
+func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
-		return true, nil
+		return true
 	}
 	if os.IsNotExist(err) {
-		return false, nil
+		return false
 	}
-	return false, err
-}
-
-func getStoragePath(app string, fileName string) string {
-	// 拼接路径
-	var buffer bytes.Buffer
-	buffer.WriteString(BasePath)
-	buffer.WriteString("/storage/")
-	buffer.WriteString(app)
-	buffer.WriteString("/")
-	buffer.WriteString(fileName)
-
-	return buffer.String()
-}
-
-func GetStorageContent(app string, fileName string) (string, error) {
-	// 读取文件
-	content, err := os.ReadFile(getStoragePath(app, fileName))
-
-	return string(content), err
-}
-
-func GetStorageJSON(app string, fileName string, v interface{}) error {
-	// 读取文件
-	content, err := os.ReadFile(getStoragePath(app, fileName))
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(content, &v); err != nil {
-		return err
-	}
-
-	return err
-}
-
-func SetStorageContent(app string, fileName string, content string) error {
-	// 写入文件
-	return os.WriteFile(getStoragePath(app, fileName), []byte(content), 0666)
-}
-
-func AppendStorageContent(app string, fileName string, content string) error {
-	file, err := os.OpenFile(getStoragePath(app, fileName), os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-
-	_, err = writer.WriteString(content + "\n")
-	if err != nil {
-		return err
-	}
-
-	writer.Flush()
-
-	return nil
+	return false
 }
 
 func structToMap(obj interface{}, lowerKey bool) map[string]interface{} {
@@ -226,65 +147,4 @@ func GetStructFieldNameToSnake(s interface{}) ([]string, error) {
 	}
 
 	return result, nil
-}
-
-/**
- * 驼峰转蛇形
- * @description XxYy to xx_yy , XxYY to xx_y_y
- * @date 2020/7/30
- * @param s 需要转换的字符串
- * @return string
- **/
-func CamelToSnake(s string) string {
-	data := make([]byte, 0, len(s)*2)
-	j := false
-	num := len(s)
-	for i := 0; i < num; i++ {
-		d := s[i]
-		// or通过ASCII码进行大小写的转化
-		// 65-90（A-Z），97-122（a-z）
-		//判断如果字母为大写的A-Z就在前面拼接一个_
-		if i > 0 && d >= 'A' && d <= 'Z' && j {
-			data = append(data, '_')
-		}
-		if d != '_' {
-			j = true
-		}
-		data = append(data, d)
-	}
-
-	//ToLower把大写字母统一转小写
-	return strings.ToLower(string(data[:]))
-}
-
-/**
- * 蛇形转驼峰
- * @description xx_yy to XxYx  xx_y_y to XxYY
- * @date 2020/7/30
- * @param s要转换的字符串
- * @return string
- **/
-func SnakeToCamel(s string) string {
-	data := make([]byte, 0, len(s))
-	j := false
-	k := false
-	num := len(s) - 1
-	for i := 0; i <= num; i++ {
-		d := s[i]
-		if !k && d >= 'A' && d <= 'Z' {
-			k = true
-		}
-		if d >= 'a' && d <= 'z' && (j || !k) {
-			d = d - 32
-			j = false
-			k = true
-		}
-		if k && d == '_' && num > i && s[i+1] >= 'a' && s[i+1] <= 'z' {
-			j = true
-			continue
-		}
-		data = append(data, d)
-	}
-
-	return string(data[:])
 }

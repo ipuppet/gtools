@@ -7,6 +7,7 @@ import (
 var (
 	ConfigPath string
 	LogPath    string
+	IsParse    bool = false
 )
 
 const (
@@ -21,6 +22,9 @@ func init() {
 	flag.StringVar(&ConfigPath, "config", configPathDefault, configPathUsage)
 
 	flag.StringVar(&LogPath, "log", logPathDefault, logPathUsage)
+}
 
+func Parse() {
 	flag.Parse()
+	IsParse = true
 }

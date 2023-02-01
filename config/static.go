@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-
-	"github.com/ipuppet/gtools/flags"
 )
 
 func GetConfig(filename string, v interface{}) {
-	configString, err := os.ReadFile(filepath.Join(flags.ConfigPath, filename))
+	configString, err := os.ReadFile(filepath.Join(ConfigPath, filename))
 	if err != nil {
 		logger.Fatal(err)
 	}

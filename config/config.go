@@ -14,11 +14,15 @@ import (
 )
 
 var (
-	logger *log.Logger
+	logger     *log.Logger
+	ConfigPath string
 )
 
 func init() {
 	logger = utils.Logger("config")
+	if flags.IsParse {
+		ConfigPath = flags.ConfigPath
+	}
 }
 
 type Config struct {
@@ -51,6 +55,14 @@ func (c *Config) Init() {
 
 func (c *Config) path() string {
 	if c._path == "" {
+		if flags.IsParse {
+			ConfigPath = flags.ConfigPath
+		}
+
+		if !utils.PathExists(ConfigPath) {
+			log.Fatal("config path not existe: " + ConfigPath)
+		}
+
 		c._path = filepath.Join(flags.ConfigPath, c.Filename)
 	}
 

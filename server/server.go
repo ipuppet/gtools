@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -27,7 +26,6 @@ func GetServer(addr string, handle func(engine *gin.Engine)) *http.Server {
 	handle(engine)
 
 	logger.Println("server listening on: " + addr)
-	fmt.Println("server listening on: " + addr)
 
 	return &http.Server{
 		Addr:         addr,

@@ -1,18 +1,26 @@
 package database
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"log"
 	"reflect"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/ipuppet/gtools/cache"
-	"github.com/ipuppet/gtools/config"
 	"github.com/ipuppet/gtools/utils"
 )
+
+type DatabaseConfig struct {
+	Driver   string            `json:"driver"`
+	Host     string            `json:"host"`
+	Port     string            `json:"port"`
+	Username string            `json:"username"`
+	Password string            `json:"password"`
+	Args     map[string]string `json:"args"`
+}
 
 var (
 	logger  *log.Logger
@@ -24,28 +32,38 @@ func init() {
 	dbCache = cache.New()
 }
 
-func ConnectToMySQL(database string) *sql.DB {
-	var dc map[string]string
-	config.GetConfig("database.json", &dc)
-
+func ConnectToMySQL(dc *DatabaseConfig, dbName string) *sql.DB {
 	// 拼接数据库连接
-	var connectLinkBuffer bytes.Buffer
-	connectLinkBuffer.WriteString(dc["username"])
-	connectLinkBuffer.WriteString(":")
-	connectLinkBuffer.WriteString(dc["password"])
-	connectLinkBuffer.WriteString("@tcp(")
-	connectLinkBuffer.WriteString(dc["host"])
-	connectLinkBuffer.WriteString(":")
-	connectLinkBuffer.WriteString(dc["port"])
-	connectLinkBuffer.WriteString(")/")
-	connectLinkBuffer.WriteString(database)
-	connectLinkBuffer.WriteString("?charset=")
-	connectLinkBuffer.WriteString(dc["charset"])
-	connectLinkBuffer.WriteString("&parseTime=True")
+	var connectLinkBuilder strings.Builder
+	connectLinkBuilder.Grow(10)
+	connectLinkBuilder.WriteString(dc.Username)
+	connectLinkBuilder.WriteString(":")
+	connectLinkBuilder.WriteString(dc.Password)
+	connectLinkBuilder.WriteString("@tcp(")
+	connectLinkBuilder.WriteString(dc.Host)
+	connectLinkBuilder.WriteString(":")
+	connectLinkBuilder.WriteString(dc.Port)
+	connectLinkBuilder.WriteString(")/")
+	connectLinkBuilder.WriteString(dbName)
+	if argCount := len(dc.Args); argCount > 0 {
+		var argsBuilder strings.Builder
+		argsBuilder.Grow(argCount * 4)
+		argsBuilder.WriteString("?")
+		for k, v := range dc.Args {
+			argCount--
+			argsBuilder.WriteString(k)
+			argsBuilder.WriteString("=")
+			argsBuilder.WriteString(v)
+			if argCount > 0 {
+				argsBuilder.WriteString("&")
+			}
+		}
+		connectLinkBuilder.WriteString(argsBuilder.String())
+	}
 
-	db, err := sql.Open("mysql", connectLinkBuffer.String())
+	db, err := sql.Open(dc.Driver, connectLinkBuilder.String())
 	if err != nil {
-		logger.Fatal("Connect to ", database, " failed:", err)
+		logger.Fatal("Connect to ", dbName, " failed:", err)
 		return nil
 	}
 
@@ -57,14 +75,14 @@ func CleanCache() {
 }
 
 func SQLQueryRetrieveMap(db *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, error) {
-	return _SQLQueryRetrieveMap(db, query, true, args...)
+	return sqlQueryRetrieveMap(db, query, true, args...)
 }
 
 func SQLQueryRetrieveMapNoCache(db *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, error) {
-	return _SQLQueryRetrieveMap(db, query, false, args...)
+	return sqlQueryRetrieveMap(db, query, false, args...)
 }
 
-func _SQLQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...interface{}) ([]map[string]interface{}, error) {
+func sqlQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...interface{}) ([]map[string]interface{}, error) {
 	// key 与 args 相关
 	argsJson, _ := json.Marshal(args)
 	keyStr := query + string(argsJson[:])

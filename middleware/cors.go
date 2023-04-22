@@ -7,16 +7,7 @@ import (
 	"github.com/ipuppet/gtools/config"
 )
 
-var (
-	corsConfig *config.Config
-)
-
-func Cors(app string) gin.HandlerFunc {
-	if corsConfig == nil {
-		corsConfig = config.New("cors.json")
-		corsConfig.AddNotifyer(config.LoggerNotifyer())
-	}
-
+func Cors(corsConfig *config.Config, app string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")

@@ -23,7 +23,7 @@ func NewNotifyer(callback func(c *Config)) Notifyer {
 func LoggerNotifyer() Notifyer {
 	n := &EasyNotifyer{
 		callback: func(c *Config) {
-			logger.Printf("config %s reloaded", c.Filename)
+			logger.Printf("config %s reloaded", c.Path)
 		},
 	}
 	return n

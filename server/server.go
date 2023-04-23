@@ -7,15 +7,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ipuppet/gtools/middleware"
-	"github.com/ipuppet/gtools/utils"
 )
 
 var (
 	logger *log.Logger
 )
 
-func init() {
-	logger = utils.Logger("server")
+func SetLogger(l *log.Logger) {
+	logger = l
 }
 
 func GetServer(addr string, handle func(engine *gin.Engine)) *http.Server {

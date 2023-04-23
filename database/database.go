@@ -27,12 +27,19 @@ var (
 	dbCache *cache.Cache
 )
 
+func SetLogger(l *log.Logger) {
+	logger = l
+}
+
 func init() {
-	logger = utils.Logger("database")
 	dbCache = cache.New()
 }
 
-func ConnectToMySQL(dc *DatabaseConfig, dbName string) *sql.DB {
+func ConnectToMySQL(dc *DatabaseConfig) *sql.DB {
+	return ConnectToMySQLWithDb(dc, "")
+}
+
+func ConnectToMySQLWithDb(dc *DatabaseConfig, dbName string) *sql.DB {
 	// 拼接数据库连接
 	var connectLinkBuilder strings.Builder
 	connectLinkBuilder.Grow(10)

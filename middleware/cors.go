@@ -7,6 +7,18 @@ import (
 	"github.com/ipuppet/gtools/config"
 )
 
+var (
+	corsConfig *config.Config
+)
+
+func SetConfig(c *config.Config) {
+	corsConfig = c
+}
+
+func CorsWithApp(app string) gin.HandlerFunc {
+	return Cors(corsConfig, app)
+}
+
 func Cors(corsConfig *config.Config, app string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method

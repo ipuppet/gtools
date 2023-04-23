@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 )
 
-func GetConfig(filename string, v interface{}) {
-	configString, err := os.ReadFile(filepath.Join(ConfigPath, filename))
+func GetConfig(path string, v interface{}) {
+	configString, err := os.ReadFile(filepath.Join(BasePath, path))
 	if err != nil {
 		logger.Fatal(err)
 	}

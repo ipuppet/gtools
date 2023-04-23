@@ -9,24 +9,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ipuppet/gtools/flags"
 	"github.com/ipuppet/gtools/utils"
 )
 
 var (
-	logger     *log.Logger
-	ConfigPath string
+	logger   *log.Logger
+	BasePath string
 )
 
-func init() {
-	logger = utils.Logger("config")
-	if flags.IsParse {
-		ConfigPath = flags.ConfigPath
-	}
+func SetLogger(l *log.Logger) {
+	logger = l
 }
 
 type Config struct {
-	Filename       string
+	Path           string
 	_path          string
 	data           map[string]interface{}
 	lastModifyTime int64
@@ -34,9 +30,9 @@ type Config struct {
 	notifyList     []Notifyer
 }
 
-func New(filename string) *Config {
+func New(path string) *Config {
 	config := &Config{
-		Filename: filename,
+		Path: path,
 	}
 	config.Init()
 
@@ -55,15 +51,10 @@ func (c *Config) Init() {
 
 func (c *Config) path() string {
 	if c._path == "" {
-		if flags.IsParse {
-			ConfigPath = flags.ConfigPath
+		c._path = filepath.Join(BasePath, c.Path)
+		if !utils.PathExists(c._path) {
+			log.Fatal("config dose not existe: " + c._path)
 		}
-
-		if !utils.PathExists(ConfigPath) {
-			log.Fatal("config path not existe: " + ConfigPath)
-		}
-
-		c._path = filepath.Join(flags.ConfigPath, c.Filename)
 	}
 
 	return c._path
@@ -94,13 +85,13 @@ func (c *Config) reload() {
 		func() {
 			file, err := os.Open(c.path())
 			if err != nil {
-				logger.Printf("open %s failed, err: %v\n", c.Filename, err)
+				logger.Printf("open %s failed, err: %v\n", c.Path, err)
 				return
 			}
 			defer file.Close()
 			fileInfo, err := file.Stat()
 			if err != nil {
-				logger.Printf("stat %s failed, err: %v\n", c.Filename, err)
+				logger.Printf("stat %s failed, err: %v\n", c.Path, err)
 				return
 			}
 

@@ -1,15 +1,15 @@
 package utils
 
 import (
+	"io"
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/ipuppet/gtools/flags"
 )
 
 var (
 	loggerMap map[string]*log.Logger
+	LogPath   string
 )
 
 func init() {
@@ -18,19 +18,20 @@ func init() {
 
 func Logger(name string) *log.Logger {
 	if loggerMap[name] == nil {
-		logPath := BasePath
-		if flags.IsParse {
-			if !PathExists(flags.LogPath) {
-				log.Fatal("logger path not existe: " + flags.LogPath)
+		var out io.Writer
+		if PathExists(LogPath) {
+			file := filepath.Join(LogPath, "main.log")
+			logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
+			if err != nil {
+				panic(err)
 			}
-			logPath = flags.LogPath
+			out = logFile
+		} else {
+			out = os.Stderr
+			log.Panicln("path " + LogPath + " does not exist")
 		}
-		file := filepath.Join(logPath, "main.log")
-		logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
-		if err != nil {
-			panic(err)
-		}
-		loggerMap[name] = log.New(logFile, "["+name+"] ", log.LstdFlags|log.LUTC)
+		// 默认输出到 os.Stderr
+		loggerMap[name] = log.New(out, "["+name+"] ", log.LstdFlags|log.LUTC)
 	}
 
 	return loggerMap[name]

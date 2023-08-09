@@ -4,82 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"log"
 	"reflect"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/ipuppet/gtools/cache"
 	"github.com/ipuppet/gtools/utils"
 )
-
-type DatabaseConfig struct {
-	Driver   string            `json:"driver"`
-	Host     string            `json:"host"`
-	Port     string            `json:"port"`
-	Username string            `json:"username"`
-	Password string            `json:"password"`
-	Args     map[string]string `json:"args"`
-}
-
-var (
-	logger  *log.Logger
-	dbCache *cache.Cache
-)
-
-func SetLogger(l *log.Logger) {
-	logger = l
-}
-
-func init() {
-	dbCache = cache.New()
-}
-
-func ConnectToMySQL(dc *DatabaseConfig) *sql.DB {
-	return ConnectToMySQLWithDb(dc, "")
-}
-
-func ConnectToMySQLWithDb(dc *DatabaseConfig, dbName string) *sql.DB {
-	// 拼接数据库连接
-	var connectLinkBuilder strings.Builder
-	connectLinkBuilder.Grow(10)
-	connectLinkBuilder.WriteString(dc.Username)
-	connectLinkBuilder.WriteString(":")
-	connectLinkBuilder.WriteString(dc.Password)
-	connectLinkBuilder.WriteString("@tcp(")
-	connectLinkBuilder.WriteString(dc.Host)
-	connectLinkBuilder.WriteString(":")
-	connectLinkBuilder.WriteString(dc.Port)
-	connectLinkBuilder.WriteString(")/")
-	connectLinkBuilder.WriteString(dbName)
-	if argCount := len(dc.Args); argCount > 0 {
-		var argsBuilder strings.Builder
-		argsBuilder.Grow(argCount * 4)
-		argsBuilder.WriteString("?")
-		for k, v := range dc.Args {
-			argCount--
-			argsBuilder.WriteString(k)
-			argsBuilder.WriteString("=")
-			argsBuilder.WriteString(v)
-			if argCount > 0 {
-				argsBuilder.WriteString("&")
-			}
-		}
-		connectLinkBuilder.WriteString(argsBuilder.String())
-	}
-
-	db, err := sql.Open(dc.Driver, connectLinkBuilder.String())
-	if err != nil {
-		logger.Fatal("Connect to ", dbName, " failed:", err)
-		return nil
-	}
-
-	return db
-}
-
-func CleanCache() {
-	dbCache.Clean()
-}
 
 func SQLQueryRetrieveMap(db *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, error) {
 	return sqlQueryRetrieveMap(db, query, true, args...)

@@ -26,9 +26,14 @@ func sqlQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...inter
 
 	// 读取缓存
 	if withCache {
-		cacheData := dbCache.Get(cacheKey)
-		if cacheData != nil {
-			return cacheData.([]map[string]interface{}), nil
+		cacheData, err := GetRedisCache(cacheKey)
+		if err == nil {
+			var results []map[string]interface{}
+			err = json.Unmarshal([]byte(cacheData), &results)
+			if err != nil {
+				return nil, err
+			}
+			return results, nil
 		}
 	}
 
@@ -96,7 +101,11 @@ func sqlQueryRetrieveMap(db *sql.DB, query string, withCache bool, args ...inter
 
 	if withCache {
 		// 设置缓存
-		dbCache.Set(cacheKey, results)
+		jsonResults, err := json.Marshal(results)
+		if err != nil {
+			return nil, err
+		}
+		SetRedisCache(cacheKey, string(jsonResults))
 	}
 
 	return results, nil

@@ -1,10 +1,12 @@
 package database
 
 import (
+	"context"
 	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/ipuppet/gtools/cache"
+	"github.com/redis/go-redis/v9"
 )
 
 type DatabaseConfig struct {
@@ -17,18 +19,40 @@ type DatabaseConfig struct {
 }
 
 var (
-	logger  *log.Logger
-	dbCache *cache.Cache
+	logger        *log.Logger
+	rdb           *redis.Client
+	rdbKeyPrefix  string
+	rdbCtx        context.Context
+	rdbExpiration time.Duration
 )
-
-func init() {
-	dbCache = cache.New()
-}
 
 func SetLogger(l *log.Logger) {
 	logger = l
 }
 
-func CleanCache() {
-	dbCache.Clean()
+func SetRedis(r *redis.Client) {
+	rdb = r
+	rdbKeyPrefix = "gtools-database-cache"
+	rdbCtx = context.Background()
+	rdbExpiration = 24 * time.Hour
+}
+
+func SetRedisWithExpiration(r *redis.Client, expiration time.Duration) {
+	SetRedis(r)
+	rdbExpiration = expiration
+}
+
+func CleanCache() error {
+	iter := rdb.Scan(rdbCtx, 0, rdbKeyPrefix+"*", 0).Iterator()
+	for iter.Next(rdbCtx) {
+		err := rdb.Del(rdbCtx, iter.Val()).Err()
+		if err != nil {
+			return err
+		}
+	}
+	if err := iter.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }

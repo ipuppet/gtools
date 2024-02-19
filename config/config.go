@@ -130,3 +130,15 @@ func (c *Config) Get(key string) (value interface{}, err error) {
 	}
 	return
 }
+
+func (c *Config) ShouldGet(key string) (value interface{}) {
+	// 根据字符串获取
+	c.rwLock.RLock()
+	defer c.rwLock.RUnlock()
+	value, ok := c.data[key]
+	if !ok {
+		value = nil
+		return
+	}
+	return
+}

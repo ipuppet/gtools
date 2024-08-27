@@ -8,10 +8,10 @@ import (
 )
 
 func ConnectToMySQL(dc *DatabaseConfig) *sql.DB {
-	return ConnectToMySQLWithDb(dc, "")
+	return ConnectToMySQLWithTable(dc, "")
 }
 
-func ConnectToMySQLWithDb(dc *DatabaseConfig, dbName string) *sql.DB {
+func ConnectToMySQLWithTable(dc *DatabaseConfig, table string) *sql.DB {
 	// 拼接数据库连接
 	var connectLinkBuilder strings.Builder
 	connectLinkBuilder.Grow(10)
@@ -23,7 +23,7 @@ func ConnectToMySQLWithDb(dc *DatabaseConfig, dbName string) *sql.DB {
 	connectLinkBuilder.WriteString(":")
 	connectLinkBuilder.WriteString(dc.Port)
 	connectLinkBuilder.WriteString(")/")
-	connectLinkBuilder.WriteString(dbName)
+	connectLinkBuilder.WriteString(table)
 	if argCount := len(dc.Args); argCount > 0 {
 		var argsBuilder strings.Builder
 		argsBuilder.Grow(argCount * 4)
@@ -42,7 +42,7 @@ func ConnectToMySQLWithDb(dc *DatabaseConfig, dbName string) *sql.DB {
 
 	db, err := sql.Open(dc.Driver, connectLinkBuilder.String())
 	if err != nil {
-		logger.Fatal("Connect to ", dbName, " failed:", err)
+		logger.Fatal("Connect to ", table, " failed:", err)
 		return nil
 	}
 

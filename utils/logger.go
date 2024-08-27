@@ -23,7 +23,7 @@ func Logger(name string) *log.Logger {
 			file := filepath.Join(LogPath, "main.log")
 			logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
 			if err != nil {
-				panic(err)
+				panic(err.Error())
 			}
 			out = logFile
 		} else {

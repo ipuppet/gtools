@@ -148,3 +148,18 @@ func GetStructFieldNameToSnake(s interface{}) ([]string, error) {
 
 	return result, nil
 }
+
+func GetStructTags(v interface{}, tagName string) string {
+	val := reflect.TypeOf(v)
+	var tags []string
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		tag := field.Tag.Get(tagName)
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	return strings.Join(tags, ",")
+}

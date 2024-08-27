@@ -42,7 +42,7 @@ func ConnectToMySQLWithTable(dc *DatabaseConfig, table string) *sql.DB {
 
 	db, err := sql.Open(dc.Driver, connectLinkBuilder.String())
 	if err != nil {
-		logger.Fatal("Connect to ", table, " failed:", err)
+		logger.Fatal("Connect to ", table, " failed:", err.Error())
 		return nil
 	}
 

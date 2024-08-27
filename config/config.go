@@ -42,7 +42,7 @@ func New(path string) *Config {
 func (c *Config) Init() {
 	m, err := c.parse()
 	if err != nil {
-		logger.Println(err)
+		logger.Println(err.Error())
 		return
 	}
 	c.data = m
@@ -85,13 +85,13 @@ func (c *Config) reload() {
 		func() {
 			file, err := os.Open(c.path())
 			if err != nil {
-				logger.Printf("open %s failed, err: %v\n", c.Path, err)
+				logger.Printf("open %s failed, err: %v\n", c.Path, err.Error())
 				return
 			}
 			defer file.Close()
 			fileInfo, err := file.Stat()
 			if err != nil {
-				logger.Printf("stat %s failed, err: %v\n", c.Path, err)
+				logger.Printf("stat %s failed, err: %v\n", c.Path, err.Error())
 				return
 			}
 
@@ -101,7 +101,7 @@ func (c *Config) reload() {
 			if curModifyTime > c.lastModifyTime {
 				m, err := c.parse()
 				if err != nil {
-					logger.Println("parse failed, err: ", err)
+					logger.Println("parse failed, err: ", err.Error())
 					return
 				}
 

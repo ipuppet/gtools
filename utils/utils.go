@@ -149,7 +149,7 @@ func GetStructFieldNameToSnake(s interface{}) ([]string, error) {
 	return result, nil
 }
 
-func GetStructTags(v interface{}, tagName string) string {
+func GetStructTags(v interface{}, tagName string) []string {
 	val := reflect.TypeOf(v)
 	var tags []string
 
@@ -161,5 +161,5 @@ func GetStructTags(v interface{}, tagName string) string {
 		}
 	}
 
-	return strings.Join(tags, ",")
+	return tags
 }

@@ -13,12 +13,20 @@ import (
 )
 
 var (
-	logger   *log.Logger
-	BasePath string
+	logger     *log.Logger
+	ConfigPath string
 )
 
 func SetLogger(l *log.Logger) {
 	logger = l
+}
+
+func GetBasePath() string {
+	if ConfigPath == "" {
+		ConfigPath, _ = os.Getwd()
+		ConfigPath = filepath.Join(ConfigPath, "config")
+	}
+	return ConfigPath
 }
 
 type Config struct {
@@ -51,7 +59,7 @@ func (c *Config) Init() {
 
 func (c *Config) path() string {
 	if c._path == "" {
-		c._path = filepath.Join(BasePath, c.Path)
+		c._path = filepath.Join(GetBasePath(), c.Path)
 		if !utils.PathExists(c._path) {
 			log.Fatal("config dose not existe: " + c._path)
 		}

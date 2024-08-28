@@ -7,12 +7,12 @@ import (
 )
 
 func GetConfig(path string, v interface{}) {
-	configString, err := os.ReadFile(filepath.Join(BasePath, path))
+	configBytes, err := os.ReadFile(filepath.Join(GetBasePath(), path))
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	if err := json.Unmarshal(configString, &v); err != nil {
+	if err := json.Unmarshal(configBytes, &v); err != nil {
 		logger.Fatal(err.Error())
 	}
 }

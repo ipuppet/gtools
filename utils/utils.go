@@ -8,17 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
-
-	_ "github.com/go-sql-driver/mysql"
 )
-
-var (
-	BasePath string
-)
-
-func init() {
-	BasePath, _ = os.Getwd()
-}
 
 func ParseIP(s string) (net.IP, int) {
 	ip := net.ParseIP(s)

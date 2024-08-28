@@ -2,21 +2,19 @@ package utils
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"os"
+	"path/filepath"
 )
 
-func getStoragePath(app string, fileName string) string {
-	// 拼接路径
-	var buffer bytes.Buffer
-	buffer.WriteString(BasePath)
-	buffer.WriteString("/storage/")
-	buffer.WriteString(app)
-	buffer.WriteString("/")
-	buffer.WriteString(fileName)
+var StoragePath string
 
-	return buffer.String()
+func getStoragePath(app string, fileName string) string {
+	if StoragePath == "" {
+		StoragePath, _ = os.Getwd()
+		StoragePath = filepath.Join(StoragePath, "storage")
+	}
+	return filepath.Join(StoragePath, app, fileName)
 }
 
 func GetStorageContent(app string, fileName string) (string, error) {
